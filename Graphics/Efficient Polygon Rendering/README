@@ -1,0 +1,21 @@
+Function: Takes in a file of the form;
+[num points]
+[num triangles]
+<x1> <y1> <z1>
+.
+.
+<pt_a> <pt_b> <pt_c>
+.
+.
+and draws the coresponding polygon using
+efficient triangle drawing and a z-buffer.
+The functionality allows you to rotate the model
+about it's y-axis.
+
+usage:
+[program].out [input file name]
+
+controls:
+a-rotate left
+d-rotate right
+w-toggle wireframe

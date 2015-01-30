@@ -1,0 +1,57 @@
+Script started on Sun 16 Mar 2014 07:18:05 PM PDT
+~
+amesh001@well $ cd cs100/hw/hw9
+~/cs100/hw/hw9
+amesh001@well $ threadClient.out
+Error: too few arguments.
+~/cs100/hw/hw9
+amesh001@well $ threadClient.out well.cd[Ks.ucr.edu /bin
+~/cs100/hw/hw9
+amesh001@well $ ls
+[0m[0mconServer.cpp[0m   [01;34mThread1files[0m/  [01;34mThread6files[0m/     [0mthreadClient.log[0m
+[0mconServer.log[0m   [01;34mThread2files[0m/  [01;34mThread7files[0m/     [01;32mthreadClient.out[0m*
+[01;32mconServer.out[0m*  [01;34mThread3files[0m/  [01;34mThread8files[0m/
+[0mmakefile[0m        [01;34mThread4files[0m/  [01;34mThread9files[0m/
+[01;34mThread10files[0m/  [01;34mThread5files[0m/  [0mthreadClient.cpp[0m
+[m~/cs100/hw/hw9
+amesh001@well $ cd Thread1files
+~/cs100/hw/hw9/Thread1files
+amesh001@well $ ls
+[0m[01;34mbin[0m/
+[m~/cs100/hw/hw9/Thread1files
+amesh001@well $ cd bin
+~/cs100/hw/hw9/Thread1files/bin
+amesh001@well $ ls
+[0m[01;32malsacard[0m*              [01;32med[0m*               [01;32mmailx[0m*            [01;32msleep[0m*
+[01;32malsaunmute[0m*            [01;32megrep[0m*            [01;32mmkdir[0m*            [01;32msort[0m*
+[01;32march[0m*                  [01;32menv[0m*              [01;32mmknod[0m*            [01;32mstty[0m*
+[01;32mawk[0m*                   [01;32mex[0m*               [01;32mmktemp[0m*           [01;32msu[0m*
+[01;32mbasename[0m*              [01;32mfalse[0m*            [01;32mmore[0m*             [01;32msync[0m*
+[01;32mbash[0m*                  [01;32mfgrep[0m*            [01;32mmount[0m*            [01;32mtar[0m*
+[01;32mcat[0m*                   [01;32mgawk[0m*             [01;32mmountpoint[0m*       [01;32mtaskset[0m*
+[01;32mchgrp[0m*                 [01;32mgettext[0m*          [01;32mmv[0m*               [01;32mtcptraceroute[0m*
+[01;32mchmod[0m*                 [01;32mgrep[0m*             [01;32mnetstat[0m*          [01;32mtcsh[0m*
+[01;32mchown[0m*                 [01;32mgtar[0m*             [01;32mnice[0m*             [01;32mtouch[0m*
+[01;32mcp[0m*                    [01;32mgunzip[0m*           [01;32mnisdomainname[0m*    [01;32mtracepath[0m*
+[01;32mcpio[0m*                  [01;32mgzip[0m*             [01;32mpgawk[0m*            [01;32mtracepath6[0m*
+[01;32mcsh[0m*                   [01;32mhostname[0m*         [01;32mping[0m*             [01;32mtraceroute[0m*
+[01;32mcut[0m*                   [01;32migawk[0m*            [01;32mping6[0m*            [01;32mtraceroute6[0m*
+[01;32mdate[0m*                  [01;32mipcalc[0m*           [01;32mps[0m*               [01;32mtracert[0m*
+[01;32mdbus-cleanup-sockets[0m*  [01;32mkbd_mode[0m*         [01;32mpwd[0m*              [01;32mtrue[0m*
+[01;32mdbus-daemon[0m*           [01;32mkeyctl[0m*           [01;32mraw[0m*              [01;32mumount[0m*
+[01;32mdbus-monitor[0m*          [01;32mkill[0m*             [01;32mred[0m*              [01;32muname[0m*
+[01;32mdbus-send[0m*             [01;32mksh[0m*              [01;32mredhat_lsb_init[0m*  [01;32municode_start[0m*
+[01;32mdbus-uuidgen[0m*          [01;32mksh93[0m*            [01;32mrm[0m*               [01;32municode_stop[0m*
+[01;32mdd[0m*                    [01;32mlink[0m*             [01;32mrmdir[0m*            [01;32munlink[0m*
+[01;32mdf[0m*                    [01;32mln[0m*               [01;32mrpm[0m*              [01;32musleep[0m*
+[01;32mdmesg[0m*                 [01;32mloadkeys[0m*         [01;32mrvi[0m*              [01;32mvi[0m*
+[01;32mdnsdomainname[0m*         [01;32mloadkeys.static[0m*  [01;32mrview[0m*            [01;32mview[0m*
+[01;32mdoexec[0m*                [01;32mlogger[0m*           [01;32msed[0m*              [01;32mypdomainname[0m*
+[01;32mdomainname[0m*            [01;32mlogin[0m*            [01;32msetfont[0m*          [01;32mzcat[0m*
+[01;32mdumpkeys[0m*              [01;32mls[0m*               [01;32msetserial[0m*        [01;32mzsh[0m*
+[01;32mecho[0m*                  [01;32mmail[0m*             [01;32msh[0m*
+[m~/cs100/hw/hw9/Thread1files/bin
+amesh001@well $ exit
+exit
+
+Script done on Sun 16 Mar 2014 07:19:51 PM PDT
