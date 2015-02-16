@@ -1,0 +1,111 @@
+# First Name: Andrew
+# Last Name: Meshekoff
+# Username: amesh001
+# email address: amesh001@ucr.edu
+#
+#
+# Assignment: Homework #7
+#
+# I hereby certify that the contents of this file represent
+# my own original individual work. Nowhere herein is there
+# code from any outside resources such as another individual,
+# a website, or publishings unless specifically designated as
+# permissible by the instructor or TA.
+#!/bin/bash
+
+NAME=""
+SIZE=""
+TYPE=""
+PRINT=""
+EXEC=""
+DIR="."
+
+function filter {	#evaluates to true if no conditions given
+	if [[ $NAME == "" || $NAME == $(basename "$1") ]];
+	then
+		if [[ $TYPE == "" || ($TYPE == "d" && -d "$1") || ($TYPE == "f" && -f "$1") ]];
+		then
+			if [[ ($NAME == "" && $TYPE == "" && $EXEC == "") || $PRINT == "PRINT" ]];
+			then
+				echo $1
+			fi
+			if [[ $EXEC != "" ]];
+			then
+				sedarg="s:{}:"$1":g" #replaces "{}" with $1
+				$(echo ${EXEC} | sed ${sedarg})
+			fi
+		fi
+	fi
+}
+
+function dirSearch {
+	files=( $1"/"* ) #outputs contents of dir
+	for i in ${files[@]}
+	do
+		if [ -f "$i" ];
+		then
+			filter "$i"
+		fi
+	done
+
+#	hidden=( $1"/."*[^.] ) 	#if uncommented, then will search
+#	if [[ $(ls -A $1) ]];	#hidden files but outputs regular
+#	then			#expression if no case is matched
+#		for i in ${hidden[@]}
+#		do
+#			END=$(basename "$i")
+#			echo $END
+#			if [[ $END!=".*[^.]" ]];
+#			then
+#				filter "$i"
+#			fi
+#		done
+#	fi
+
+	direcs=( $1"/"* ) #recursive step: open directories
+	for i in ${direcs[@]}
+	do
+		if [[ -d "$i" ]];
+		then
+			filter "$i"
+			if [[ $(ls -A "$i") ]]
+			then
+				dirSearch "$i"
+			fi
+		fi
+	done
+}
+
+
+
+if [[ $# > 0 && -d $1 ]];
+then
+	DIR=$1
+fi
+
+argi="1"
+cmdstat="0"
+while (("$argi" <= "$#")); #parses line and assigns respective cond.
+do
+	if [ ${!argi} = "-name" ];
+	then
+		eval NAME=\$$[$argi+1]
+	elif [ ${!argi} = "-type" ];
+	then
+		eval TYPE=\$$[$argi+1]
+	elif [ ${!argi} = "-print" ]
+	then
+		PRINT="PRINT"
+	elif [ ${!argi} = "-exec" ];
+	then
+		argi=$[$argi+1] #cats all args after "-exec"
+		while [[ $argi -le $# && ${!argi} != ";" ]];
+		do
+			EXEC="$EXEC ${!argi}"
+			argi=$[$argi+1]
+		done
+	fi
+	argi=$[$argi+1]
+done
+
+dirSearch $DIR		

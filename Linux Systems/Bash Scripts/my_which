@@ -1,0 +1,35 @@
+# First Name: Andrew
+# Last Name: Meshekoff
+# Username: amesh001
+# email address: amesh001@ucr.edu
+#
+#
+# Assignment: Homework #7
+#
+# I hereby certify that the contents of this file represent
+# my own original individual work. Nowhere herein is there
+# code from any outside resources such as another individual,
+# a website, or publishings unless specifically designated as
+# permissible by the instructor or TA.
+
+#!/bin/bash
+
+STAT="not found"
+
+for i in $(echo $PATH | tr ':' ' '); #changes delimiter to spaces for for-loop
+do
+	if [ "$STAT" = "not found" ];
+	then	#find searches only the immediate directory, redirecting error messages
+		RES=$(find $i -maxdepth 1 -type f -name $1 -perm +111 -print 2>/dev/null)
+		if [[ $RES ]];
+		then
+			echo $RES
+			STAT="found" #indicates the first instance of $1 has been found
+		fi
+	fi
+done
+
+if [ "$STAT" = "not found" ];
+then
+	echo "no "$1" found in "$PATH
+fi

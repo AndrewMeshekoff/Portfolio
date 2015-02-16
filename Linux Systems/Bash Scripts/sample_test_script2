@@ -1,0 +1,73 @@
+#!/bin/bash
+
+CMD=(*$1*)
+
+cd "./"$CMD
+
+CMD2="./avltree.h"
+CMD3=("./"*"avltree.h")
+
+mv "$CMD3" "$CMD2"
+
+touch "./grade.txt"
+
+cp -f "../value_ptr.h" "./value_ptr.h"
+
+for IFILE in $(ls "../test"*".cpp");
+do
+	OFILE=$(echo $IFILE | cut -c 2-)
+	cp -f $IFILE $OFILE
+done
+
+g++ --std=c++11 testKfunc.cpp
+
+./a.out > testout.txt
+
+echo >> testout.txt
+echo Testing const function: >> testout.txt
+if ! g++ --std=c++11 testKConst.cpp; then
+    echo Failed! >> testout.txt
+fi
+
+g++ --std=c++11 testBfunc.cpp
+
+echo >> testout.txt
+
+./a.out >> testout.txt
+
+g++ --std=c++11 testKComp.cpp
+./a.out > Kdata.txt
+
+gnuplot <<EOF
+    set xlabel "Operations"
+    set ylabel "Time (s)"
+    set term png
+    set output "Kdata.png"
+    plot "Kdata.txt"
+EOF
+
+g++ --std=c++11 testBCompSingle.cpp
+./a.out > BSingledata.txt
+
+gnuplot <<EOF
+    set xlabel "Operations"
+    set ylabel "Time (s)"
+    set term png
+    set output "BSingledata.png"
+    plot "BSingledata.txt"
+EOF
+
+g++ --std=c++11 testBCompWhole.cpp
+./a.out > BWholedata.txt
+
+gnuplot <<EOF
+    set xlabel "Operations"
+    set ylabel "Time (s)"
+    set term png
+    set output "BWholedata.png"
+    plot "BWholedata.txt"
+EOF
+
+
+rm -f "test"*".cpp"
+rm -f *"data.txt"

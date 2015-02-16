@@ -1,0 +1,101 @@
+#!/bin/bash
+
+CMD=(*$1*)
+
+cd "./"$CMD
+
+CMD2="./factory.cpp"
+CMD3=("./"*"factory.cpp")
+
+mv "$CMD3" "$CMD2"
+
+touch "./grade.txt"
+
+g++ --std=c++11 $CMD2
+
+rm -f "./diff.txt"
+
+rm -f "./diffu.txt"
+
+var=1
+
+for i in $(ls "../mset"*".txt");
+do
+	echo "Test $var:" >> "./diff.txt"
+
+	echo "Test $var:" >> "./diffu.txt"
+	
+	./a.out $i > "./stud_out$var.txt"
+
+	../a.out $i > "./sol_out.txt"
+
+	diff "./sol_out.txt" "./stud_out$var.txt" >> "./diff.txt"
+
+	diff -u "./sol_out.txt" "./stud_out$var.txt" >> "./diffu.txt"
+
+	echo >> "./diff.txt"
+
+	echo >> "./diff.txt"
+
+	echo >> "./diffu.txt"
+
+	echo >> "./diffu.txt"
+
+	((var++))
+done
+
+rm -f "./testcode.cpp"
+
+line=$(grep -n '^#include' factory.cpp | tail -1 | cut -d: -f1)
+
+sed "$line r ../replace/event.txt" < factory.cpp > testcode.cpp
+
+line=`grep -n "void start(int t) {" testcode.cpp |cut -f1 -d:`
+line=$((line+1))
+sed -i "${line}d" testcode.cpp
+
+line=`grep -n "void end(int t) {" testcode.cpp |cut -f1 -d:`
+line=$((line+1))
+sed -i "${line}d" testcode.cpp
+
+line=`grep -n "void consume" testcode.cpp |cut -f1 -d:`
+line=$((line+1))
+line2=$((line+2))
+sed -i "${line},${line2}d" testcode.cpp
+
+line=`grep -n "void produce" testcode.cpp |cut -f1 -d:`
+line=$((line+1))
+line2=$((line+2))
+sed -i "${line},${line2}d" testcode.cpp
+
+sed -i "/void start(int t) {/a \	sol_add_event(t, sol_event('S', -1));" testcode.cpp
+sed -i "/void end(int t) {/a \	sol_add_event(t, sol_event('E', -1));" testcode.cpp
+sed -i "/void consume(int t, int m, std::vector<int> inputs) {/a \
+	sol_add_event(t, sol_event('C', m, inputs));" testcode.cpp
+sed -i "/void produce(int t, int m, std::vector<int> outputs) {/a \
+	sol_add_event(t, sol_event('P', m, outputs));" testcode.cpp
+
+sed -i 's/int main/int stud_main/' testcode.cpp
+
+cat ../replace/test.txt >> testcode.cpp
+
+g++ --std=c++11 testcode.cpp
+
+rm -f "./testout.txt"
+
+if grep --quiet std::priority_queue ./factory.cpp; then
+    echo "Used PQueue." >> testout.txt
+else
+    echo "Did not use PQueue!" >> testout.txt
+fi
+
+var=1
+
+for i in $(ls "../mset"*".txt");
+do
+	echo "Test $var:" >> "./testout.txt"
+	./a.out $i >> "./testout.txt"
+	echo >> "./testout.txt"
+	echo >> "./testout.txt"
+	((var++))
+done
