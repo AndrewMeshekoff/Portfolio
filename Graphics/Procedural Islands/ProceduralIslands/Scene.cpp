@@ -8,46 +8,6 @@
 
 extern ProgramData ProgramContext;
 
-static glm::vec3 g_camTarget(0.0f, 0.0f, 0.0f);
-static glm::vec3 g_sphereCamRelPos(-100.0f , -30.0f, 30.0f);
-
-glm::vec3 ResolveCamPosition()
-{
-	glutil::MatrixStack tempMat;
-
-	float phi = g_sphereCamRelPos.x * 3.14159 / 180;
-	float theta = (g_sphereCamRelPos.y + 90.0f) * 3.14159 / 180;
-
-	float fSinTheta = sinf(theta);
-	float fCosTheta = cosf(theta);
-	float fCosPhi = cosf(phi);
-	float fSinPhi = sinf(phi);
-
-	glm::vec3 dirToCamera(fSinTheta * fCosPhi, fCosTheta, fSinTheta * fSinPhi);
-	return (dirToCamera * g_sphereCamRelPos.z) + g_camTarget;
-}
-
-glm::mat4 CalcLookAtMatrix(const glm::vec3 &cameraPt, const glm::vec3 &lookPt, const glm::vec3 &upPt)
-{
-	glm::vec3 lookDir = glm::normalize(lookPt - cameraPt);
-	glm::vec3 upDir = glm::normalize(upPt);
-
-	glm::vec3 rightDir = glm::normalize(glm::cross(lookDir, upDir));
-	glm::vec3 perpUpDir = glm::cross(rightDir, lookDir);
-
-	glm::mat4 rotMat(1.0f);
-	rotMat[0] = glm::vec4(rightDir, 0.0f);
-	rotMat[1] = glm::vec4(perpUpDir, 0.0f);
-	rotMat[2] = glm::vec4(-lookDir, 0.0f);
-
-	rotMat = glm::transpose(rotMat);
-
-	glm::mat4 transMat(1.0f);
-	transMat[3] = glm::vec4(-cameraPt, 1.0f);
-
-	return rotMat * transMat;
-}
-
 Scene::Scene()
 	:mainCamera(glm::vec3(0.0, 0.0, 0.0),
 				glm::vec3(50.0, 30.0, 30.0),
