@@ -8,7 +8,7 @@ layout(std140) uniform viewMatrices
 	uniform mat4 cameraToClipMatrix;
 };
 
-out vec3 texCoord;
+smooth out vec3 texCoord;
 
 void main()
 {

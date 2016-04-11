@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 anchorPoint, glm::vec3 spherePosition, glm::vec3 upDirection)
-	:anchorPoint(anchorPoint), spherePosition(spherePosition), upDirection(glm::normalize(upDirection))
+Camera::Camera(glm::vec3 anchorPoint, glm::vec3 spherePosition, glm::vec3 upDirection, float minRadius)
+	:anchorPoint(anchorPoint), spherePosition(spherePosition), upDirection(glm::normalize(upDirection)), minRadius(minRadius)
 {}
 
 glm::vec3 Camera::GetPosRelAnchor()
@@ -10,9 +10,9 @@ glm::vec3 Camera::GetPosRelAnchor()
 
 	float r_xz = spherePosition.x * cosf(spherePosition.y * d2R);
 
-	return glm::vec3(r_xz * cosf(spherePosition.z * d2R),
+	return glm::vec3(r_xz * sinf(spherePosition.z * d2R),
 		spherePosition.x * sinf(spherePosition.y * d2R),
-		r_xz * sinf(spherePosition.z * d2R));
+		r_xz * cosf(spherePosition.z * d2R));
 }
 
 glm::mat4 Camera::GetCameraMatrix()
@@ -43,6 +43,11 @@ glm::vec3 Camera::GetLookDirection()
 	return glm::normalize(-posRelAnchor);
 }
 
+glm::vec3 Camera::GetEyePosition()
+{
+	return anchorPoint + GetPosRelAnchor();
+}
+
 void Camera::OffsetAnchor(glm::vec3 offset)
 {
 	anchorPoint += offset;
@@ -51,4 +56,18 @@ void Camera::OffsetAnchor(glm::vec3 offset)
 void Camera::OffsetSphere(glm::vec3 offset)
 {
 	spherePosition += offset;
+}
+
+void Camera::OffsetRadius(float radius)
+{
+	spherePosition.x += radius;
+
+	if (spherePosition.x < minRadius)
+		spherePosition.x = minRadius;
+}
+
+void Camera::SetSphereDirection(glm::vec2 direction)
+{
+	spherePosition.y = direction.x;
+	spherePosition.z = direction.y;
 }

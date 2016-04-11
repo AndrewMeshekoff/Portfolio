@@ -11,6 +11,8 @@ Texture::Texture(const char * textureFile)
 
 	int x, y, n;
 	unsigned char* imageData = stbi_load(textureFile, &x, &y, &n, 4);
+	width = x;
+	height = y;
 
 	glGenTextures(1, &textureHandle);
 	glBindTexture(type, textureHandle);
@@ -54,6 +56,8 @@ void Texture::LoadCubeSide(const char* textureFile, GLenum side)
 {
 	int x, y, n;
 	unsigned char* imageData = stbi_load(textureFile, &x, &y, &n, 4);
+	width = x;
+	height = y;
 
 	glTexImage2D(side,
 		0,
@@ -67,6 +71,30 @@ void Texture::LoadCubeSide(const char* textureFile, GLenum side)
 		);
 
 	delete[] imageData;
+}
+
+
+Texture::Texture(int w, int h, GLenum format)
+{
+	width = w;
+	height = h;
+
+	type = GL_TEXTURE_2D;
+	glGenTextures(1, &textureHandle);
+	glBindTexture(type, textureHandle);
+
+	glTexImage2D(type, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, 0);
+
+	glGenSamplers(1, &samplerHandle);
+	glSamplerParameteri(samplerHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameteri(samplerHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(samplerHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(samplerHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+GLuint Texture::GetTexHandle()
+{
+	return textureHandle;
 }
 
 void Texture::BindTexture(GLuint target)

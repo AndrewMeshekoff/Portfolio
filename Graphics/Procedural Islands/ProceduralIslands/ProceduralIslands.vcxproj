@@ -130,10 +130,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="HillGenerator.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Asset.cpp" />
+    <ClCompile Include="ObjectPole.cpp" />
     <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
@@ -142,9 +144,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="HillGenerator.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Asset.h" />
+    <ClInclude Include="ObjectPole.h" />
     <ClInclude Include="ProgramData.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />

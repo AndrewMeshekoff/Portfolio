@@ -6,7 +6,11 @@
 #include <vector>
 
 ProgramData::ProgramData()
-	:programList(), programTime(false, 0.0), frameTimer(false, 0.017)
+	:programList(), programTime(false, 0.0), frameTimer(false, 0.017), screenX(100), screenY(100)
+{}
+
+ProgramData::ProgramData(int screenX, int screenY)
+	:programList(), programTime(false, 0.0), frameTimer(false, 0.017), screenX(screenX), screenY(screenY)
 {}
 
 void ProgramData::Setup()
@@ -22,6 +26,24 @@ void ProgramData::Setup()
 	skyShader->LoadShader(GL_FRAGMENT_SHADER, "CubeMap.fs");
 	skyShader->LinkProgram();
 	programList.push_back(skyShader);
+
+	IslandReflectShader* reflectShader = new IslandReflectShader();
+	reflectShader->LoadShader(GL_VERTEX_SHADER, "TerrainReflection.vs");
+	reflectShader->LoadShader(GL_FRAGMENT_SHADER, "TerrainReflection.fs");
+	reflectShader->LinkProgram();
+	programList.push_back(reflectShader);
+
+	WaterShader* waterShader = new WaterShader();
+	waterShader->LoadShader(GL_VERTEX_SHADER, "Water.vs");
+	waterShader->LoadShader(GL_FRAGMENT_SHADER, "Water.fs");
+	waterShader->LinkProgram();
+	programList.push_back(waterShader);
+
+	AlphaShader* alphaShader = new AlphaShader();
+	alphaShader->LoadShader(GL_VERTEX_SHADER, "Water.vs");
+	alphaShader->LoadShader(GL_FRAGMENT_SHADER, "AlphaOnly.fs");
+	alphaShader->LinkProgram();
+	programList.push_back(alphaShader);
 
 	BindViewBuffer();
 
@@ -44,7 +66,10 @@ void ProgramData::Setup()
 void ProgramData::BindViewBuffer()
 {
 	glUniformBlockBinding(GetProgramHandle(0), programList[0]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
-	glUniformBlockBinding(GetProgramHandle(1), programList[0]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
+	glUniformBlockBinding(GetProgramHandle(1), programList[1]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
+	glUniformBlockBinding(GetProgramHandle(2), programList[2]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
+	glUniformBlockBinding(GetProgramHandle(3), programList[3]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
+	glUniformBlockBinding(GetProgramHandle(4), programList[4]->uniforms[UniformEnums::VIEW_BLOCK_INDEX], 0);
 
 	glGenBuffers(1, &viewMatrixBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, viewMatrixBuffer);
@@ -82,6 +107,16 @@ void ProgramData::UpdateModToCamBlock(const glm::mat4& matrix)
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(matrix));
 }
 
+int ProgramData::ScreenWidth()
+{
+	return screenX;
+}
+
+int ProgramData::ScreenHeight()
+{
+	return screenY;
+}
+
 void ProgramData::SceneDisplay()
 {
 	if (!frameTimer.IsPassed())
@@ -98,6 +133,9 @@ void ProgramData::SceneDisplay()
 
 void ProgramData::SceneReshape(int w, int h)
 {
+	screenX = w;
+	screenY = h;
+
 	currentScene->Reshape(w, h);
 }
 
@@ -116,7 +154,26 @@ void ProgramData::HandleKey(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-/*ProgramData::~ProgramData()
+void ProgramData::MouseMotion(int x, int y)
+{
+	currentScene->MouseMotion(x, y);
+}
+
+void ProgramData::MouseButton(int button, int state, int x, int y)
+{
+	currentScene->MouseButton(button, state, x, y);
+}
+
+void ProgramData::MouseWheel(int wheel, int direction, int x, int y)
+{
+	currentScene->MouseWheel(wheel, direction, x, y);
+}
+
+ProgramData::~ProgramData()
 {
 	delete currentScene;
-}*/
+	for (int i = 0; i < programList.size(); i++)
+	{
+		delete programList[i];
+	}
+}

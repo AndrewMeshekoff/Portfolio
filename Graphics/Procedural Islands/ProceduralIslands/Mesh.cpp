@@ -1,5 +1,12 @@
 #include "Mesh.h"
 
+Vertex::Vertex()
+	:position(glm::vec3(0.0, 0.0, 0.0)), normal(glm::vec3(0.0, 0.0, 0.0))
+{}
+
+Vertex::Vertex(glm::vec3 position, glm::vec3 normal)
+	:position(position), normal(normal)
+{}
 
 Mesh::Mesh(Vertex* vertexBuffer, unsigned int vertexCount, GLenum primitive)
 {

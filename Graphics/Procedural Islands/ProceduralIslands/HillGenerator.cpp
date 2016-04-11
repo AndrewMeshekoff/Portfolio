@@ -11,7 +11,7 @@ HillGenerator::HillGenerator(unsigned int size,
 							unsigned int maxHeight,
 							unsigned int islandRadius,
 							unsigned int seed)
-	:size(size), numHills(numHills), maxRadius(maxRadius), minRadius(minRadius), maxHeight(maxHeight), minHeight(minHeight), islandRadius(islandRadius), seed(seed)
+	:size(size), numHills(numHills), maxRadius(maxRadius), minRadius(minRadius), maxHeight(maxHeight), minHeight(minHeight), islandRadius(islandRadius), clampWidth(30), seed(seed)
 {
 	srand(seed);
 
@@ -50,6 +50,26 @@ void HillGenerator::SumMaps()
 	}
 }
 
+void HillGenerator::ClampEdges()
+{
+	for (int clampI = 0; clampI < clampWidth; clampI++)
+	{
+		float scaling = (cos((1 - clampI / (float)clampWidth) * 3.1415) + 1) * 0.5;
+
+		for (int xI = clampI + 1; xI < size - clampI - 1; xI++)
+		{
+			heightMap[xI][clampI] *= scaling;
+			heightMap[xI][size - clampI - 1] *= scaling;
+		}
+		for (int yI = clampI; yI < size - clampI; yI++)
+		{
+			heightMap[clampI][yI] *= scaling;
+			heightMap[size - clampI - 1][yI] *= scaling;
+		}
+	}
+
+}
+
 void HillGenerator::GenerateHeightmap()
 {
 	for (int i = 0; i < numHills; i++)
@@ -62,11 +82,13 @@ void HillGenerator::GenerateHeightmap()
 		AddSphereHill();
 	}
 
-	float alpha = 0.90;
+	float alpha = 0.75;
 	Normalize(bumpMap, 1.0 - alpha);
 	Normalize(heightMap, alpha);
 
 	SumMaps();
+
+	ClampEdges();
 }
 
 

@@ -12,6 +12,7 @@ class HillGenerator
 	unsigned int maxRadius;
 	unsigned int minRadius;
 	unsigned int islandRadius;
+	unsigned int clampWidth;
 	unsigned int seed;
 
 	unsigned int maxHeight;
@@ -24,6 +25,8 @@ class HillGenerator
 	void Normalize(float** map, float scale = 1.0f);
 
 	void SumMaps();
+
+	void ClampEdges();
 
 	float RandomFloat(float min, float max);
 

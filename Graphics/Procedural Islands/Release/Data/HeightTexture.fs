@@ -3,19 +3,21 @@
 smooth in vec4 interpLight;
 in vec3 texCoord;
 
-out vec4 outputColor;
+layout(location = 0) out vec4 outputColor;
 
 uniform sampler2D grassSampler;
 uniform sampler2D sandSampler;
 
 void main()
 {
-	float upperLimit = 0.7;
-	float lowerLimit = 0.6;
+	float upperLimit = 0.62;
+	float lowerLimit = 0.52;
 
 	vec2 texCoordOffset = vec2(texCoord.x + 0.5, texCoord.z + 0.5);
 
 	float alpha = clamp(texCoord.y - lowerLimit, 0, upperLimit - lowerLimit) / (upperLimit - lowerLimit);
 
-	outputColor = mix(texture2D(sandSampler, texCoordOffset.st), texture2D(grassSampler, texCoordOffset.st), alpha) * interpLight;
+	vec2 texCoordTiled = vec2(fract(texCoordOffset.x * 2), fract(texCoordOffset.y * 2));
+
+	outputColor = mix(texture2D(sandSampler, texCoordTiled), texture2D(grassSampler, texCoordTiled), alpha) * (interpLight * 0.8 + vec4(0.8, 0.6, 0.4, 0.0) * 0.2);
 }

@@ -142,10 +142,23 @@ IslandShader::IslandShader()
 void IslandShader::GetUniformVariables()
 {
 	uniforms[UniformEnums::VIEW_BLOCK_INDEX] = glGetUniformBlockIndex(program, "viewMatrices");
-	uniforms[UniformEnums::MOD_TO_CAM] = glGetUniformLocation(program, "modelToCameraMatrix");
 	uniforms[UniformEnums::NORMAL_MOD_TO_CAM] = glGetUniformLocation(program, "normalModelToCameraMatrix");
 	uniforms[UniformEnums::LIGHT_DIR] = glGetUniformLocation(program, "dirToLight");
-	uniforms[UniformEnums::CAM_TO_CLIP] = glGetUniformLocation(program, "cameraToClipMatrix");
+	uniforms[UniformEnums::GRASS_TEX_TARGET] = glGetUniformLocation(program, "grassSampler");
+	uniforms[UniformEnums::SAND_TEX_TARGET] = glGetUniformLocation(program, "sandSampler");
+}
+
+IslandReflectShader::IslandReflectShader()
+	:ShaderProgram()
+{}
+
+void IslandReflectShader::GetUniformVariables()
+{
+	uniforms[UniformEnums::VIEW_BLOCK_INDEX] = glGetUniformBlockIndex(program, "viewMatrices");
+	uniforms[UniformEnums::MOD_TO_WORLD] = glGetUniformLocation(program, "modelToWorldMatrix");
+	uniforms[UniformEnums::NORMAL_MOD_TO_CAM] = glGetUniformLocation(program, "normalModelToCameraMatrix");
+	uniforms[UniformEnums::LIGHT_DIR] = glGetUniformLocation(program, "dirToLight");
+	uniforms[UniformEnums::CLIP_HEIGHT] = glGetUniformLocation(program, "clipHeight");
 	uniforms[UniformEnums::GRASS_TEX_TARGET] = glGetUniformLocation(program, "grassSampler");
 	uniforms[UniformEnums::SAND_TEX_TARGET] = glGetUniformLocation(program, "sandSampler");
 }
@@ -158,4 +171,33 @@ void SkyboxShader::GetUniformVariables()
 {
 	uniforms[UniformEnums::VIEW_BLOCK_INDEX] = glGetUniformBlockIndex(program, "viewMatrices");
 	uniforms[UniformEnums::SKY_TEX_TARGET] = glGetUniformLocation(program, "skySampler");
+}
+
+WaterShader::WaterShader()
+	:ShaderProgram()
+{}
+
+void WaterShader::GetUniformVariables()
+{
+	uniforms[UniformEnums::VIEW_BLOCK_INDEX] = glGetUniformBlockIndex(program, "viewMatrices");
+	uniforms[UniformEnums::CLIP_TO_TEX] = glGetUniformLocation(program, "texProjMatrix");
+	uniforms[UniformEnums::TIME_1] = glGetUniformLocation(program, "texOffset1");
+	uniforms[UniformEnums::TIME_2] = glGetUniformLocation(program, "texOffset2");
+	uniforms[UniformEnums::REFLECT_TEX_TARGET] = glGetUniformLocation(program, "reflectSampler");
+	uniforms[UniformEnums::REFRACT_TEX_TARGET] = glGetUniformLocation(program, "refractSampler");
+	uniforms[UniformEnums::DISPLACE_TEX_TARGET] = glGetUniformLocation(program, "displaceSampler");
+	uniforms[UniformEnums::NORMAL_TEX_TARGET] = glGetUniformLocation(program, "normalSampler");
+	uniforms[UniformEnums::FLOOR_DEPTH_TARGET] = glGetUniformLocation(program, "floorDepthSampler");
+	uniforms[UniformEnums::SURF_DEPTH_TARGET] = glGetUniformLocation(program, "surfDepthSampler");
+	uniforms[UniformEnums::EYE_TAN_SPACE] = glGetUniformLocation(program, "eyeTanSpace");
+	uniforms[UniformEnums::LIGHT_TAN_SPACE] = glGetUniformLocation(program, "lightTanSpace");
+}
+
+AlphaShader::AlphaShader()
+	:ShaderProgram()
+{}
+
+void AlphaShader::GetUniformVariables()
+{
+	uniforms[UniformEnums::VIEW_BLOCK_INDEX] = glGetUniformBlockIndex(program, "viewMatrices");
 }

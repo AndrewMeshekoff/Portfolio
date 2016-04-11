@@ -8,13 +8,19 @@
 #define WINDOW_X 1024
 #define WINDOW_Y 768
 
-ProgramData ProgramContext;
+ProgramData ProgramContext(WINDOW_X, WINDOW_Y);
 
 void Display() { ProgramContext.SceneDisplay(); }
 
 void Reshape(int w, int h) { ProgramContext.SceneReshape(w, h); }
 
 void keyboard(unsigned char key, int x, int y) { ProgramContext.HandleKey(key, x, y); }
+
+void MouseMotion(int x, int y) { ProgramContext.MouseMotion(x, y); }
+
+void MouseButton(int button, int state, int x, int y) { ProgramContext.MouseButton(button, state, x, y); }
+
+void MouseWheel(int wheel, int direction, int x, int y) { ProgramContext.MouseWheel(wheel, direction, x, y); }
 
 
 void prompt()
@@ -24,11 +30,10 @@ void prompt()
 		"\tA-Left\n"
 		"\tS-Backward\n"
 		"\tD-Right\n"
-		"\tI-Pitch Forward\n"
-		"\tK-Pitch Backward\n"
-		"\tJ-Yaw Left\n"
-		"\tL-Yaw Right\n"
-		"\t[space]-Regenerate Map\n");
+		"\t[LMB + Drag]-Look\n"
+		"\t[Scroll]-Zoom\n"
+		"\t[Space]-Regenerate Map\n"
+		"\tEsc-Quit\n");
 }
 
 int initContext(int argc, char**argv)
@@ -62,7 +67,9 @@ int initContext(int argc, char**argv)
 	glutDisplayFunc(Display);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(keyboard);
-
+	glutMouseFunc(MouseButton);
+	glutMotionFunc(MouseMotion);
+	glutMouseWheelFunc(MouseWheel);
 }
 
 

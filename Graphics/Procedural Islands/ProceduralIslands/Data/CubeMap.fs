@@ -1,12 +1,12 @@
 #version 330
 
-in vec3 texCoord;
+smooth in vec3 texCoord;
 
-out vec4 outputColor;
+layout(location = 0) out vec4 outputColor;
 
 uniform samplerCube skySampler;
 
 void main ()
 {
-	outputColor = texture(skySampler, texCoord);
+	outputColor = texture(skySampler, texCoord) * vec4(1.0, 0.9, 0.9, 1.0);
 }
