@@ -1,0 +1,67 @@
+import socket
+import sys
+from thread import*
+
+class Message:
+    def __init__(self, text, tags, owner):
+        self.text = text
+        self.tags = tags
+        self.owner = owner
+
+class User:
+    def __init__(self, name, password, subscribed, unread):
+        self.name = name
+        self.password = password
+        self.subscribed = subscribed
+        self.unread = unread
+
+accounts = []
+accounts.append(User('trixy', '1234', ['steve', 'joe'], []))
+accounts.append(User('steve', '5678', ['joe'], []))
+accounts.append(User('joe', 'abcd', ['trixy'], []))
+
+messages = []
+myList = []
+    
+def client_thread(conn):
+    myList.append(conn)
+    cred = conn.recv(2048)
+    c_name = cred[:cred.find(' ')]
+    c_pass = cred[cred.find(' ')+1:]
+    verify = [account for account in accounts \
+        if account.name == c_name and account.password == c_pass]
+    if verify:
+        msg_count =  str(len(verify[0].unread))
+        conn.sendall("0passed "+msg_count)
+    else:
+        conn.sendall("0failed")
+
+    exit = False
+    while not exit:
+        pass
+#        action = conn.recv(2048)
+#        if action[0] == '1':
+#        elif action[0] == '2':
+#        elif action[0] == '3':
+#        elif action[0] == '4':
+#        elif action[0] == '5':
+#        elif action[0] == '6':
+#        elif action[0] == '7':
+#        elif action[0] == '8':
+    conn.close()
+
+
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.bind(('', 9987))
+
+s.listen(3)
+
+while 1:
+    conn, addr = s.accept()
+
+    start_new_thread(client_thread ,(conn,))
+
+conn.close()
+s.close()

@@ -1,0 +1,111 @@
+import socket
+import sys
+import threading
+from thread import*
+
+menu_lock = threading.Lock()
+menu_bit = False
+packet = ""
+
+def get_packet():
+    global menu_bit
+    with menu_lock:
+        while not menu_bit:
+            pass
+        menu_packet = packet
+        menu_bit = False
+    return menu_packet
+
+def menu(conn):
+    authenticated = False
+    while not authenticated:
+        name = raw_input("Login: ")
+        password = raw_input("Password: ")
+        cred = name+' '+password
+        conn.sendall(cred)
+        response = get_packet()
+        if response[:6] == 'passed':
+            print 'Hi '+name+', you have '+response[7:]+' unread messages.'
+            authenticated = True
+    log_in = True
+    while log_in:
+        c= raw_input("""Main Menu:
+             -See Offline Messages (s)
+             -Edit Subscriptions (e)
+             -Post a Message (p)
+             -Logout (l)
+             """)
+        if c=='s':
+            c = raw_input("""Would you like to: 
+            -Show all offline messages? (a)
+            -Show messages from subscriptions? (s)
+            -Go back (b)
+            """)
+            if c=='a':
+                conn.sendall("1")
+                response = get_packet()
+                i=0
+                while response!='end':
+                    owner=response[:response.find(' ')]
+                    response = response[:response.find(' ')+1]
+                    message = response
+                    print 'Message #'+str(i)
+                    print 'User: '+owner
+                    print "\""+message+"\""
+                if i==0:
+                    print 'No new messages'
+
+            elif c=='s':
+				conn.sendall("2")
+				response = get_packet()
+				subscribed = response.split()
+				print('Subscriptions:')
+				for user in subscribed
+					print(user)
+				request = raw_input('Type a space deliminated list' + \
+				' of subscriptions to print:')
+				request_list = request.split()
+				for user in request_list:
+					if not (user in subscribed):
+						print user+' is not a valid choice.'
+				request_list[:] = [user for user in request_list \
+				if (user in subscribed)]
+				request = "3"+
+				
+						
+				
+					
+				
+        elif c=='e':
+        elif c=='p':
+        elif c=='l':
+        else:
+            print 'Invalid input'
+
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error, msg:
+    print 'Error creating socket:' + str(msg[1])
+    sys.exit()
+    
+server_ip = "127.0.0.1"
+
+s.connect((server_ip, 9987))
+
+menu_lock.acquire()
+start_new_thread(menu, (s,))
+
+while 1:
+    packet = s.recv(2048)
+    if packet[0] == '1':
+        print packet[1:]
+    else:
+        packet = packet[1:]
+        menu_bit = True
+        menu_lock.release()
+        while menu_bit:
+            pass
+        menu_lock.acquire()
+
+s.close()
+
