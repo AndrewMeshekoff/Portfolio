@@ -1,0 +1,476 @@
+%{
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <sstream>
+ #include <fstream>
+ #include <string>
+ #include <set>
+ #include <stack>
+
+ sstream declare;
+ sstream body;
+ 
+ ofstream output("output.mil");
+
+ map<string, int> identifiers;
+ stack<string> id_stack;
+ stack<string> index_stack;
+ stack<string> logic_stack;
+ stack<string> pred_stack;
+ stack<string> label_stack;
+
+ int temp_num = 0;
+ int pred_num = 0;
+ int label_num = 0;
+ 
+ bool declare_mode = 1;
+
+ string from_array (string save) {
+	if (index_stack.top()!="-1") {
+		sstream conv;
+		conv << temp_num;
+		declare << ". t" << temp_num << endl;
+		body << "=[] t" << temp_num << ", " << save
+		<< ", " << index_stack.top() << endl;
+		temp_num++;
+		return "t"+conv.str();
+	}
+	return save;
+ }
+
+ void yyerror(const char *msg);
+ extern int currLine;
+ extern int currPos;
+
+%}
+
+%union{
+  int ival;
+  char s[20];
+}
+
+%error-verbose
+%start prog
+%token 	PROGRAM BEGIN_PROGRAM END_PROGRAM INTEGER
+	ARRAY OF IF THEN ENDIF ELSE ELSEIF WHILE DO
+	BEGINLOOP ENDLOOP BREAK CONTINUE EXIT READ
+	WRITE AND OR NOT TRUE FALSE SUB ADD MULT DIV
+	MOD EQ NEQ LT GT LTE GTE PLUS MINUS
+	SEMICOLON COLON COMMA QUESTION 
+	L_BRACKET R_BRACKET L_PAREN R_PAREN ASSIGN 
+
+
+
+%token <ival> NUMBER
+%token <s> IDENT
+%type <ival> exp
+%type <ival> exp_op
+%type <ival> mult_op
+%left PLUS MINUS
+%left MULT DIV
+
+%% 
+prog:			PROGRAM IDENT SEMICOLON block END_PROGRAM   	{printf("prog -> PROGRAM ident SEMICOLON block END_PROGRAM\n");} 
+			;
+
+block:			dec SEMICOLON dec_loop begin_program stat_loop	{printf("block -> dec SEMICOLON dec_loop BEGIN_PROGRAM stat_loop\n");}
+			;
+
+begin_program:		BEGIN_PROGRAM {
+				body << ": START" << endl;
+				declare_mode = 0;
+			}
+
+dec_loop:		dec SEMICOLON dec_loop				{printf("dec_loop -> dec SEMICOLON dec_loop\n");}
+			|						{printf("dec_loop -> \n");}
+			;
+
+dec:			ident ident_loop COLON dec2			{printf("dec -> ident ident_loop COLON dec2\n");}
+			;
+
+ident_loop:		COMMA ident ident_loop		
+			|				
+			;
+
+ident:			IDENT {
+				string aug_name = "_"+string($1);
+				if(declare_mode) {
+					pair<string, int> id(string(aug_name),0);
+					if (!identifiers.insert(id).second) {
+						//declaration error already defined
+					}				
+				}
+				else {
+					if(identifiers.find(aug_name)==identifiers.end()){
+						//variable error
+					}
+					else if {
+						//check for reserved words
+					}
+					
+				}
+				id_stack.push(string(aug_name));
+			}
+			;
+
+dec2:			INTEGER	{
+				for(string dec = id_stack.top(); !id_stack.empty(); dec = id_stack, id_stack.pop())
+					declare << ". " << dec << endl;
+									
+			}
+			| ARRAY L_BRACKET NUMBER R_BRACKET OF INTEGER {
+				if ($3 <= 0) {
+					//array size error
+				}
+				for (string dec = id_stack.top(); !id_stack.empty(); dec = id_stack, id_stack.pop()) {
+					identifiers[dec] = $3;
+					declare << ".[] " << dec << ", " << identifiers[dec] << endl;
+				}
+			}
+			;
+
+stat:			EXIT {body << ":= EndLabel" << endl;}
+			| CONTINUE					{printf("stat -> CONTINUE\n");}
+			| BREAK						{printf("stat -> BREAK\n");}
+			| WRITE var_loop				{printf("stat -> WRITE var_loop\n");}
+			| READ var_loop					{printf("stat -> READ var_loop\n");}
+			| if_stat					{printf("stat -> if_stat\n");}
+			| DO BEGINLOOP stat_loop ENDLOOP WHILE bool_exp		{printf("stat -> DO BEGINLOOP stat_loop ENDLOOP WHILE bool_exp\n");}
+			| w_while bool_exp w_beginloop stat_loop ENDLOOP	{printf("stat -> WHILE bool_exp BEGINLOOP stat_loop ENDLOOP\n");}
+			| var ASSIGN stat2 {
+			        string saver = from_array(id_stack.top());
+			        id_stack.pop();
+			        index_stack.pop();
+			        if(index_stack.top()!="-1") {
+			                body << "[]= " << id_stack.top() << ", " 
+			                << saver << ", " << index_stack.top() << endl;
+			        }
+			        else {
+			                body << "= " << id_stack.top() << ", " << saver << endl;
+			        }
+			        id_stack.pop();
+			        index_stack.pop();
+			}
+			;
+
+if_stat:		IF bool_exp THEN stat_loop else_loop ENDIF	{printf("if_stat -> IF bool_exp THEN stat_loop else_loop ENDIF\n");}
+			;
+
+else_loop:		ELSEIF bool_exp stat_loop else_loop		{printf("else_loop -> ELSEIF bool_exp stat_loop else_loop\n");}
+			| ELSE stat_loop				{printf("else_loop -> ELSE stat_loop\n");}
+			|						{printf("else_loop -> \n");}
+			;
+			
+w_while:                 WHILE {
+                                body << ": L" << label_num << endl;
+				conv.str("");
+				conv << "L" << label_num;
+				label_stack.push(conv.str());
+				label_num++;
+                        }
+                        ;
+                        
+w_beginloop:            BEGINLOOP {
+                                body << "! p" << pred_num
+				<< ", " << pred_stack.top() << endl;
+				pred_stack.pop();
+				sstream conv;
+				conv << "p" << pred_num;
+				declare << ". p" << pred_num << endl;
+				string inverse = conv.str();
+				pred_num++;
+				
+				body << "?:= L" << label_num << ", " << inverse << endl;
+				conv.str("");
+				conv << "L" << label_num;
+				label_stack.push(conv.str());
+				label_num++;
+                        }
+                        ;
+                        
+w_endloop:              ENDLOOP {
+                                string end_label = label_stack.top();
+                                label_stack.pop();
+                                body << ":= " << label_stack.top() << endl;
+                                label_stack.pop();
+                                body << ": " << end_label << endl;
+                        }
+                        ;
+
+stat2:			exp
+			| bool_exp question exp colon exp {
+			        string result = id_stack.top();
+			        id_stack.pop();
+			        if (index_stack.top()!="-1")
+                        		body << "=[] " << id_stack.top() << ", " << result
+                        		<< ", " << index_stack.top() << endl;
+	                        else
+	                                body << "= " << id_stack.top() << ", " << result << endl;
+	                        index_stack.pop();
+
+			        body << ": " << label_stack.top() << endl;
+                                label_stack.pop();
+			}
+			;
+			
+colon:                  COLON {
+                        
+			        if (index_stack.top()!="-1")
+                        		body << "=[] t" << temp_num << ", " << id_stack.top()
+                        		<< ", " << index_stack.top() << endl;
+	                        else
+	                                body << "= t" << temp_num << ", " << id_stack.top() << endl;
+	                        index_stack.pop();
+	                        id_stack.pop();
+	                        declare << ". t" << temp_num << endl;
+	                        sstream conv;
+				conv << temp_num;
+				id_stack.push("t"+conv.str());
+				index_stack.push("-1");
+				temp_num++;
+	                        
+
+                                body << ":= L" << label_num << endl;
+                                body << ": " << label_stack.top() << endl;
+                                label_stack.pop();
+                                sstream conv
+				conv << "L" << label_num;
+				label_stack.push(conv.str());
+				label_num++;
+                        }
+                        ;
+			
+question:               QUESTION {
+				body << "! p" << pred_num
+				<< ", " << pred_stack.top() << endl;
+				pred_stack.pop();
+				sstream conv;
+				conv << "p" << pred_num;
+				declare << ". p" << pred_num << endl;
+				string inverse = conv.str();
+				pred_num++;
+				
+				body << "?:= L" << label_num << ", " << inverse << endl;
+				conv.str("");
+				conv << "L" << label_num;
+				label_stack.push(conv.str());
+				label_num++;
+                        }
+			;
+
+bool_exp:		rel_and_exp bool_exp2
+			;
+
+bool_exp2:		OR rel_and_exp bool_exp2 {
+                                string saver = pred_stack.top();
+                                pred_stack.pop();
+                                string savel = pred_stack.top();
+                                pred_stack.pop();
+                                declare << ". p" << pred_num << endl;
+                                body << "|| p" << pred_num << ", " << savel << ", " << saver << endl;
+                                sstream conv;
+                                conv << "p" << pred_num;
+                                pred_stack.push(conv.str());
+                                pred_num++;
+                        }
+			|
+			;
+
+rel_and_exp:		rel_exp rel_and_exp2
+			;
+
+rel_and_exp2:		AND rel_exp rel_and_exp2 {
+                                string saver = pred_stack.top();
+                                pred_stack.pop();
+                                string savel = pred_stack.top();
+                                pred_stack.pop();
+                                declare << ". p" << pred_num << endl;
+                                body << "&& p" << pred_num << ", " << savel << ", " << saver << endl;
+                                sstream conv;
+                                conv << "p" << pred_num;
+                                pred_stack.push(conv.str());
+                                pred_num++;
+                        }
+			|
+			;
+
+rel_exp:		NOT rel_exp2 {
+				body << "! p" << pred_num
+				<< ", " << pred_stack.top() << endl;
+				pred_stack.pop();
+				sstream conv;
+				conv << "p" << pred_num;
+				declare << ". p" << pred_num << endl;
+				pred_stack.push(conv.str());
+				pred_num++;
+			}
+			| rel_exp2
+			;
+
+rel_exp2:		exp comp exp {
+				string saver = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				string savel = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				body << comp_stack.top() << " p" << pred_num
+				<< ", " << savel << ", " << saver << endl;
+				comp_stack.pop();
+				sstream conv;
+				conv << "p" << pred_num;
+				declare << ". p" << pred_num << endl;
+				pred_stack.push(conv.str());
+				pred_num++;
+			}
+			| TRUE {pred_stack.push("1");}
+			| FALSE {pred_stack.push("0");}
+			| L_PAREN bool_exp R_PAREN
+			;
+
+comp:			EQ {logic_stack.push("==");}
+			| NEQ {logic_stack.push("!=");}
+			| LT {logic_stack.push("<");}
+			| GT {logic_stack.push(">");}
+			| LTE {logic_stack.push("<=");}
+			| GTE {logic_stack.push(">=");}
+			;
+
+exp:			m_exp exp2					{printf("exp -> m_exp exp2\n");}
+			;
+
+exp2:			exp_op m_exp exp2 {
+				string saver = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				string savel = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				switch ($1) {
+					case 0: //addition
+						body << "+";
+					break;
+					case 1: //subtraction
+						body << "-";
+					break;
+				}
+				declare << ". t" << temp_num << endl;
+ 				body << " t" << temp_num << ", " << savel << ", " << saver << endl;
+				sstream conv;
+				conv << temp_num;
+				id_stack.push("t"+conv.str());
+				index_stack.push("-1");
+				temp_num++;
+			}
+			|
+			;
+
+exp_op:			ADD {$$ = 0;}
+			| SUB {$$ = 1;}
+			;
+
+m_exp:			term m_exp2					{printf("m_exp -> term m_exp2\n");}
+			;
+
+m_exp2:			mult_op term m_exp2 {
+				string saver = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				string savel = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop();
+				switch ($1) {
+					case 0: //multiplication
+						body << "*";
+					break;
+					case 1: //division
+						body << "/";
+					break;
+					case 2: //modulus
+						body << "%";
+					break;
+				}
+				declare << ". t" << temp_num << endl;
+ 				body << " t" << temp_num << ", " << savel << ", " << saver << endl;
+				sstream conv;
+				conv << temp_num;
+				id_stack.push("t"+conv.str());
+				index_stack.push("-1");
+				temp_num++;
+			}
+			|
+			;
+
+mult_op:		MULT {$$ = 0;}
+			| DIV {$$ = 1;}
+			| MOD {$$ = 2;}
+			;
+
+term:			SUB term2 {
+				string save = from_array(id_stack.top());
+				id_stack.pop();
+				index_stack.pop(); //correct?
+				declare << ". t" << temp_num << endl;
+				body << "- t" << temp_num << ", 0, " << save << endl;
+				sstream conv;
+				conv << temp_num;
+				id_stack.push("t"+conv.str());
+				index_stack.push("-1");
+				temp_num++;
+			}
+			| term2
+			;
+
+term2:			var
+			| NUMBER {
+				sstream conv;
+				conv << $1;
+				id_stack.push(string(conv.str()));
+				index_stack.push("-1");
+			}
+			| L_PAREN exp R_PAREN
+			;
+
+var:			ident {
+				if (identifiers[id_stack.top()]!=0) {
+					//error: this is an array with index
+				}
+				index_stack.push("-1");
+			}
+			| ident l_bracket exp R_BRACKET {
+				index_stack.pop();
+				index_stack.push(var_stack.top());
+				var_stack.pop();
+			
+			}
+			;
+l_bracket:		L_BRACKET {
+				if (identifiers[id_stack.top()]==0) {
+					//error not an array variable
+				}
+			}
+			;
+
+stat_loop:		stat SEMICOLON stat_loop2			{printf("stat_loop -> stat SEMICOLON stat_loop2\n");}
+			;
+
+stat_loop2:		stat SEMICOLON stat_loop2			{printf("stat_loop2 -> stat SEMICOLON stat_loop2\n");}
+			|						{printf("stat_loop2 -> \n");}
+			;
+
+var_loop:		var var_loop2					{printf("var_loop -> var var_loop2\n");}
+			;
+
+var_loop2:		COMMA var var_loop2				{printf("var_loop2 -> COMMA var var_loop2\n");}
+			|						{printf("var_loop2 -> \n");}
+			;
+%%
+
+int main() {
+   yyparse();
+   return 0;
+}
+
+void yyerror(const char *msg) {
+   printf("** Line %d, position %d: %s\n", currLine, currPos, msg);
+}
